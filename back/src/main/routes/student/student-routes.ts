@@ -1,5 +1,8 @@
 import { Router } from 'express'
-import { adaptRoute } from '../../adpters/express-route-adapter'
+import {
+  adaptRoute,
+  adaptRouteListPager
+} from '../../adpters/express-route-adapter'
 import { makeFindOneStudentController } from '../../factories/student/find-one-student/find-one-student-factories'
 import { makeUpdateStudentController } from '../../factories/student/update-student/update-student-factories'
 import { makeDeleteStudentController } from '../../factories/student/delete-student/delete-student-factories'
@@ -11,7 +14,7 @@ export default (router: Router): void => {
   router.post('/student', adaptRoute(makeAddStudentController()))
 
   // List Students
-  router.get('/student', adaptRoute(makeListStudentsController()))
+  router.get('/student', adaptRouteListPager(makeListStudentsController()))
 
   // Find One Student
   router.get('/student/:id', adaptRoute(makeFindOneStudentController()))

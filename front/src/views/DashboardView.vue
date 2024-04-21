@@ -1,34 +1,66 @@
-<script setup lang="ts">
-import { ref } from 'vue'
+<script lang="ts">
+import { computed, ref } from 'vue'
+import { useStore } from 'vuex'
 
-interface User {
-  name: string
-  email: string
-  title: string
-  title2: string
-  status: string
-  role: string
+export default {
+  setup() {
+    const store = useStore()
+
+    const page = ref(0)
+    const limit = ref(10)
+    const search = ref('')
+    const orderBy = ref(null)
+
+    const students = computed(() => store.state.students)
+
+    function loadUsersWithFilters() {
+      const queryParams = {
+        page: page.value,
+        limit: limit.value,
+        search: search.value,
+        orderBy: orderBy.value
+      }
+      store.dispatch('getUsers', queryParams)
+    }
+
+    function toFirstPage() {
+      page.value = 0
+      loadUsersWithFilters()
+    }
+    function toLastPage() {
+      page.value = students.value.length
+      loadUsersWithFilters()
+    }
+    function changePage(value: number) {
+      page.value = value
+      loadUsersWithFilters()
+    }
+
+    loadUsersWithFilters()
+
+    return {
+      page,
+      limit,
+      search,
+      orderBy,
+      students,
+      loadUsersWithFilters,
+      toFirstPage,
+      toLastPage,
+      changePage
+    }
+  }
 }
-
-const testUser: User = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  title: 'Software Engineer',
-  title2: 'Web dev',
-  status: 'Active',
-  role: 'Owner'
-}
-
-const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
 </script>
 
 <template>
   <div>
     <h3 class="text-3xl font-medium text-gray-700">Dashboard</h3>
+    <button @click="loadUsersWithFilters">Carregar Usuários com Filtros</button>
 
     <div class="mt-4">
       <div class="flex flex-wrap -mx-6">
-        <div class="w-full px-6 sm:w-1/2 xl:w-1/3">
+        <div class="w-full px-6 mt-6 sm:w-1/2 xl:w-1/3">
           <div
             class="flex items-center px-5 py-6 bg-white rounded-md shadow-sm">
             <div class="p-3 bg-indigo-600 bg-opacity-75 rounded-full">
@@ -59,7 +91,9 @@ const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
             </div>
 
             <div class="mx-5">
-              <h4 class="text-2xl font-semibold text-gray-700">8,282</h4>
+              <h4 class="text-2xl font-semibold text-gray-700">
+                {{ students.length }}
+              </h4>
               <div class="text-gray-500">New Users</div>
             </div>
           </div>
@@ -130,84 +164,93 @@ const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
       <div class="py-2 -my-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <div
           class="inline-block min-w-full overflow-hidden align-middle border-b border-gray-200 shadow sm:rounded-lg">
-          <table class="min-w-full">
+          <v-table>
             <thead>
               <tr>
-                <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                  Name
-                </th>
-                <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                  Title
-                </th>
-                <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                  Status
-                </th>
-                <th
-                  class="px-6 py-3 text-xs font-medium leading-4 tracking-wider text-left text-gray-500 uppercase border-b border-gray-200 bg-gray-50">
-                  Role
-                </th>
-                <th class="px-6 py-3 border-b border-gray-200 bg-gray-50" />
+                <th class="text-center">Registro Acadêmico</th>
+                <th class="text-center">Nome</th>
+                <th class="text-center">CPF</th>
+                <th class="text-end">Ações</th>
               </tr>
             </thead>
-
-            <tbody class="bg-white">
-              <tr v-for="(u, index) in users" :key="index">
-                <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 w-10 h-10">
-                      <img
-                        class="w-10 h-10 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                        alt="" />
-                    </div>
-
-                    <div class="ml-4">
-                      <div class="text-sm font-medium leading-5 text-gray-900">
-                        {{ u.name }}
-                      </div>
-                      <div class="text-sm leading-5 text-gray-500">
-                        {{ u.email }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-
-                <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                  <div class="text-sm leading-5 text-gray-900">
-                    {{ u.title }}
-                  </div>
-                  <div class="text-sm leading-5 text-gray-500">
-                    {{ u.title2 }}
-                  </div>
-                </td>
-
-                <td
-                  class="px-6 py-4 border-b border-gray-200 whitespace-nowrap">
-                  <span
-                    class="inline-flex px-2 text-xs font-semibold leading-5 text-green-800 bg-green-100 rounded-full"
-                    >{{ u.status }}</span
-                  >
-                </td>
-
-                <td
-                  class="px-6 py-4 text-sm leading-5 text-gray-500 border-b border-gray-200 whitespace-nowrap">
-                  {{ u.role }}
-                </td>
-
-                <td
-                  class="px-6 py-4 text-sm font-medium leading-5 text-right border-b border-gray-200 whitespace-nowrap">
-                  <a href="#" class="text-indigo-600 hover:text-indigo-900"
-                    >Edit</a
-                  >
-                </td>
+            <tbody>
+              <tr v-for="item in students.data" :key="item.id">
+                <td class="text-center">{{ item.id }}</td>
+                <td class="text-center">{{ item.name }}</td>
+                <td class="text-center">{{ item.cpf }}</td>
+                <td class="text-end">[editar] [excluir]</td>
               </tr>
             </tbody>
-          </table>
+            <tfoot class="border-t min-h-12 w-full">
+              <tr>
+                <td colspan="4">
+                  <div
+                    class="bg-white dark:bg-gray-800 dark:border-gray-700 mb-1 flex space-y-3 flex-col md:flex-row justify-between items-center px-6">
+                    <div
+                      class="dark:text-gray-100 flex items-center gap-3 mt-2">
+                      itens por página
+                      <select
+                        type="number"
+                        @change="loadUsersWithFilters"
+                        v-model="limit"
+                        class="px-3 py-3 text-sm focus:z-10 focus:outline-none focus:ring-primary-500 dark:border-night-500 dark:bg-night-800 dark:text-night-100 dark:placeholder-night-200 none border-none rounded-md w-20 focus:border-none checked:border-none font-semibold">
+                        <option :value="5">5</option>
+                        <option :value="10">10</option>
+                        <option :value="20">20</option>
+                        <option :value="50">50</option>
+                        <option :value="100">100</option>
+                      </select>
+                    </div>
+
+                    <div class="dark:text-gray-100">
+                      Exibindo
+                      {{
+                        students.page * students.limit +
+                        (students.length > 0 ? 1 : 0)
+                      }}
+                      a
+                      {{
+                        students.length < 1
+                          ? 0
+                          : (students.page + 1) * students.limit >
+                            students.length
+                          ? students.length
+                          : (students.page + 1) * students.limit
+                      }}
+                      de {{ students.length }} itens
+                    </div>
+
+                    <div class="flex gap-1 items-center">
+                      <div
+                        @click="toFirstPage()"
+                        class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-1 px-2 rounded-md">
+                        <i class="fa-solid fa-angles-left text-primary-600"></i>
+                      </div>
+                      <div
+                        @click="changePage(students.page - 1)"
+                        class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-1 px-2 rounded-md">
+                        <i class="fa-solid fa-angle-left text-primary-600"></i>
+                      </div>
+                      <div class="font-semibold p-1 px-2 dark:text-gray-100">
+                        {{ students.page + 1 }}
+                      </div>
+                      <div
+                        @click="changePage(students.page + 1)"
+                        class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-1 px-2 rounded-md">
+                        <i class="fa-solid fa-angle-right text-primary-600"></i>
+                      </div>
+                      <div
+                        @click="toLastPage"
+                        class="cursor-pointer bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-1 px-2 rounded-md">
+                        <i
+                          class="fa-solid fa-angles-right text-primary-600"></i>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </v-table>
         </div>
       </div>
     </div>
