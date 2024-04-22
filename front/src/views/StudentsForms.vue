@@ -8,20 +8,20 @@ import { Mask } from 'maska'
 
 export default {
   setup() {
-    const route = useRoute()
     const router = useRouter()
-    const itemId = computed(() => route.params.id)
-    const mask = new Mask({ mask: '###.###.###-##' })
-    if (itemId.value && typeof itemId.value === 'string') {
-      getStudent(itemId.value)
-    }
-
+    const route = useRoute()
+    const itemId = computed(() => route.params.id as string)
     const form = ref<StudentModel>({
       id: undefined,
       name: '',
       email: '',
       cpf: ''
     })
+    const mask = new Mask({ mask: '###.###.###-##' })
+
+    if (itemId.value) {
+      fetchStudent(itemId.value)
+    }
 
     const errors = computed(() => {
       const errs = []
@@ -31,23 +31,20 @@ export default {
       return errs
     })
 
-    async function getStudent(id: string): Promise<void> {
-      const res = await service.FindStudentById(id)
-      if (res) {
-        form.value.id = res.id
-        form.value.name = res.name
-        form.value.cpf = res.cpf
-        form.value.email = res.email
+    async function fetchStudent(id: string): Promise<void> {
+      const student = await service.findStudentById(id)
+      if (student) {
+        Object.assign(form.value, student)
       }
     }
 
     async function onSubmit(): Promise<void> {
-      const res = await service.SaveStudent(form.value)
-      if (res) {
+      const savedStudent = await service.saveStudent(form.value)
+      if (savedStudent) {
         await swal.success(
-          form.value?.id
+          form.value.id
             ? 'Estudante atualizado com sucesso'
-            : 'Estudante Cadastrado com sucesso'
+            : 'Estudante cadastrado com sucesso'
         )
         router.push({ name: 'Dashboard' })
       }
@@ -57,14 +54,7 @@ export default {
       router.push({ name: 'Dashboard' })
     }
 
-    return {
-      mask,
-      itemId,
-      form,
-      errors,
-      onSubmit,
-      toList
-    }
+    return { mask, itemId, form, errors, onSubmit, toList }
   }
 }
 </script>

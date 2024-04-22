@@ -53,11 +53,11 @@ export default {
         if (res.deleteCount > 0) {
           swal.success(`${res.deleteCount} Estudante Removido com sucesso!`)
         }
-        loadUsersWithFilters()
+        loadStudentsWithFilters()
       }
     }
 
-    function loadUsersWithFilters() {
+    function loadStudentsWithFilters() {
       const queryParams = {
         page: page.value,
         limit: limit.value,
@@ -65,20 +65,20 @@ export default {
         orderBy: orderBy.value,
         desc: desc.value
       }
-      store.dispatch('getUsers', queryParams)
+      store.dispatch('getStudents', queryParams)
     }
 
     function toFirstPage() {
       page.value = 0
-      loadUsersWithFilters()
+      loadStudentsWithFilters()
     }
     function toLastPage() {
       page.value = students.value.length
-      loadUsersWithFilters()
+      loadStudentsWithFilters()
     }
     function changePage(value: number) {
       page.value = value
-      loadUsersWithFilters()
+      loadStudentsWithFilters()
     }
 
     function sortBy(field: string) {
@@ -93,16 +93,16 @@ export default {
         orderBy.value = field
         desc.value = false
       }
-      loadUsersWithFilters()
+      loadStudentsWithFilters()
     }
 
     function toEdit(student: StudentModel): void {
       router.push({ name: 'FormsId', params: { id: student.id } })
     }
 
-    const debouncedSearch = _.debounce(loadUsersWithFilters, 400)
+    const debouncedSearch = _.debounce(loadStudentsWithFilters, 400)
 
-    loadUsersWithFilters()
+    loadStudentsWithFilters()
 
     return {
       page,
@@ -111,7 +111,7 @@ export default {
       orderBy,
       desc,
       students,
-      loadUsersWithFilters,
+      loadStudentsWithFilters,
       toFirstPage,
       toLastPage,
       changePage,
@@ -274,7 +274,7 @@ export default {
                       itens por página
                       <select
                         type="number"
-                        @change="loadUsersWithFilters"
+                        @change="loadStudentsWithFilters"
                         v-model="limit"
                         class="px-3 py-3 text-sm focus:z-10 focus:outline-none focus:ring-primary-500 dark:border-night-500 dark:bg-night-800 dark:text-night-100 dark:placeholder-night-200 none border-none rounded-md w-20 focus:border-none checked:border-none font-semibold">
                         <option :value="5">5</option>
@@ -403,7 +403,7 @@ export default {
           itens por página
           <select
             type="number"
-            @change="loadUsersWithFilters"
+            @change="loadStudentsWithFilters"
             v-model="limit"
             class="px-3 py-3 text-sm focus:z-10 focus:outline-none focus:ring-primary-500 dark:border-night-500 dark:bg-night-800 dark:text-night-100 dark:placeholder-night-200 none border-none rounded-md w-20 focus:border-none checked:border-none font-semibold">
             <option :value="5">5</option>

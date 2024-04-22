@@ -24,7 +24,7 @@ export default createStore<StoreModel>({
     }
   },
   actions: {
-    getUsers({ commit }, filters?: FilterListModel) {
+    getStudents({ commit }, filters?: FilterListModel) {
       service.getUserAsync(filters).then(res => commit('setStudents', res))
     },
 

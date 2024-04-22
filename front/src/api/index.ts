@@ -8,24 +8,29 @@ import { LoginModel } from '@/model/login.model'
 import { AccountModel } from '@/model/account.model'
 import store from '@/store'
 
-export default {
+function handleApiError(err: any) {
+  swal.danger(
+    err.response?.data?.error ??
+      err?.message ??
+      'Oops! An internal error has occurred'
+  )
+}
+
+async function updateStoreAndToken(data: AccountModel) {
+  if (data.token) {
+    localStorage.setItem('accessToken', data.token)
+  }
+  store.dispatch('setAccountAndIsAuthenticated', data)
+  return data
+}
+
+const apiService = {
   async login(user: LoginModel): Promise<AccountModel | null> {
     try {
-      const data = await axios.post<AccountModel>(`login`, user)
-      if (data.data.token) {
-        localStorage.setItem('accessToken', data.data.token)
-      }
-
-      store.dispatch('setAccountAndIsAuthenticated', data.data)
-
-      return data.data
+      const response = await axios.post<AccountModel>('login', user)
+      return updateStoreAndToken(response.data)
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
-
+      handleApiError(err)
       store.dispatch('setAccount', null)
       return null
     }
@@ -33,21 +38,10 @@ export default {
 
   async register(account: AccountModel): Promise<AccountModel | null> {
     try {
-      const data = await axios.post<AccountModel>(`register`, account)
-      if (data.data.token) {
-        localStorage.setItem('accessToken', data.data.token)
-      }
-
-      store.dispatch('setAccountAndIsAuthenticated', data.data)
-
-      return data.data
+      const response = await axios.post<AccountModel>('register', account)
+      return updateStoreAndToken(response.data)
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
-
+      handleApiError(err)
       store.dispatch('setAccount', null)
       return null
     }
@@ -55,23 +49,10 @@ export default {
 
   async refresh(): Promise<AccountModel | null> {
     try {
-      const data = await axios.get<AccountModel>(`token`)
-      if (data.data.token) {
-        localStorage.setItem('accessToken', data.data.token)
-      }
-
-      console.log(data.data)
-
-      store.dispatch('setAccountAndIsAuthenticated', data.data)
-
-      return data.data
+      const response = await axios.get<AccountModel>('token')
+      return updateStoreAndToken(response.data)
     } catch (err: any) {
-      swal.danger(
-        (err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred') + 'Testeee'
-      )
-
+      handleApiError(err)
       store.dispatch('setAccount', null)
       return null
     }
@@ -81,65 +62,45 @@ export default {
     filters?: FilterListModel
   ): Promise<PagerData<StudentModel>> {
     try {
-      const data = await axios.get(`student`, {
-        params: filters
-      })
-
-      return data.data
+      const response = await axios.get('student', { params: filters })
+      return response.data
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
+      handleApiError(err)
       return { page: 0, limit: 10, length: 0, data: [] }
     }
   },
 
   async deleteStudent(id: string): Promise<{ deleteCount: number }> {
     try {
-      const data = await axios.delete(`student/${id}`)
-      return data.data
+      const response = await axios.delete(`student/${id}`)
+      return response.data
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
+      handleApiError(err)
       return { deleteCount: 0 }
     }
   },
 
-  async FindStudentById(id: string): Promise<StudentModel | null> {
+  async findStudentById(id: string): Promise<StudentModel | null> {
     try {
-      const data = await axios.get(`student/${id}`)
-      return data.data
+      const response = await axios.get<StudentModel>(`student/${id}`)
+      return response.data
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
+      handleApiError(err)
       return null
     }
   },
 
-  async SaveStudent(student: StudentModel): Promise<StudentModel | null> {
+  async saveStudent(student: StudentModel): Promise<StudentModel | null> {
     try {
-      if (student?.id) {
-        const data = await axios.put(`student`, student)
-        return data.data
-      }
-
-      const data = await axios.post(`student`, student)
-      return data.data
+      const endpoint = student.id ? `student` : `student/${student.id}`
+      const method = student.id ? 'put' : 'post'
+      const response = await axios[method]<StudentModel>(endpoint, student)
+      return response.data
     } catch (err: any) {
-      swal.danger(
-        err.response?.data?.error ??
-          err?.message ??
-          'Oops! An internal error has occurred'
-      )
+      handleApiError(err)
       return null
     }
   }
 }
+
+export default apiService

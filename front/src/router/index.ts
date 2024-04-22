@@ -1,10 +1,26 @@
-import type { RouteRecordRaw } from 'vue-router'
-import { createRouter, createWebHistory } from 'vue-router'
-
+import {
+  createRouter,
+  createWebHistory,
+  NavigationGuardNext,
+  RouteLocationNormalized,
+  RouteRecordRaw
+} from 'vue-router'
 import DashboardView from '@/views/DashboardView.vue'
 import StudentsForms from '@/views/StudentsForms.vue'
 import PageLogin from '@/views/PageLogin.vue'
 import store from '@/store'
+
+async function requireAuth(
+  _: RouteLocationNormalized,
+  __: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
+  const isAuthenticated = await store.getters.getIsAuthenticated
+  if (!isAuthenticated) {
+    return next({ path: '/login' })
+  }
+  next()
+}
 
 const routes: RouteRecordRaw[] = [
   {
@@ -17,37 +33,21 @@ const routes: RouteRecordRaw[] = [
     path: '/dashboard',
     name: 'Dashboard',
     component: DashboardView,
-    beforeEnter: async (_, __, next) => {
-      const res = await store.getters.getIsAuthenticated
-      if (!res) {
-        return next({ path: '/login' })
-      }
-      next()
-    }
+    beforeEnter: requireAuth
   },
   {
     path: '/forms',
     name: 'Forms',
     component: StudentsForms,
-    beforeEnter: async (_, __, next) => {
-      const res = await store.getters.getIsAuthenticated
-      if (!res) {
-        return next({ path: '/login' })
+    beforeEnter: requireAuth,
+    children: [
+      {
+        path: ':id',
+        name: 'FormsId',
+        component: StudentsForms,
+        beforeEnter: requireAuth
       }
-      next()
-    }
-  },
-  {
-    path: '/forms/:id',
-    name: 'FormsId',
-    component: StudentsForms,
-    beforeEnter: async (_, __, next) => {
-      const res = await store.getters.getIsAuthenticated
-      if (!res) {
-        return next({ path: '/login' })
-      }
-      next()
-    }
+    ]
   }
 ]
 
