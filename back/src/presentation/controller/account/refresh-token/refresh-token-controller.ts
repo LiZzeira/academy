@@ -25,9 +25,9 @@ export class RefreshTokenController implements Controller {
       }
       const { accountUser } = httpRequest.control
 
-      const token = await this.refreshToken.refresh(accountUser)
+      const token = await this.refreshToken.refresh(accountUser.id)
 
-      return okRequest({ token })
+      return okRequest({ ...accountUser, token })
     } catch (error) {
       return serverError(error)
     }

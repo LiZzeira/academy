@@ -1,153 +1,140 @@
-<script setup lang="ts">
-import { ref } from 'vue'
+<script lang="ts">
+import { StudentModel } from '@/model/student.model'
+import service from '@/api'
+import { useRoute, useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import swal from '@/swal'
+import { Mask } from 'maska'
 
-interface User {
-  username: string
-  email: string
-  password: string
-  confirm: string
-}
+export default {
+  setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const itemId = computed(() => route.params.id)
+    const mask = new Mask({ mask: '###.###.###-##' })
+    if (itemId.value && typeof itemId.value === 'string') {
+      getStudent(itemId.value)
+    }
 
-const user = ref<User>({
-  username: '',
-  email: '',
-  password: '',
-  confirm: ''
-})
+    const form = ref<StudentModel>({
+      id: undefined,
+      name: '',
+      email: '',
+      cpf: ''
+    })
 
-function register() {
-  const data = JSON.parse(JSON.stringify(user.value))
-  // eslint-disable-next-line no-console
-  console.log('Registered: ', data)
+    const errors = computed(() => {
+      const errs = []
+      if (!form.value.name) errs.push('Name is required.')
+      if (!form.value.email) errs.push('Email is required.')
+      if (!form.value.cpf) errs.push('CPF is required.')
+      return errs
+    })
+
+    async function getStudent(id: string): Promise<void> {
+      const res = await service.FindStudentById(id)
+      if (res) {
+        form.value.id = res.id
+        form.value.name = res.name
+        form.value.cpf = res.cpf
+        form.value.email = res.email
+      }
+    }
+
+    async function onSubmit(): Promise<void> {
+      const res = await service.SaveStudent(form.value)
+      if (res) {
+        await swal.success(
+          form.value?.id
+            ? 'Estudante atualizado com sucesso'
+            : 'Estudante Cadastrado com sucesso'
+        )
+        router.push({ name: 'Dashboard' })
+      }
+    }
+
+    function toList(): void {
+      router.push({ name: 'Dashboard' })
+    }
+
+    return {
+      mask,
+      itemId,
+      form,
+      errors,
+      onSubmit,
+      toList
+    }
+  }
 }
 </script>
 
 <template>
   <div>
-    <h3 class="text-3xl font-semibold text-gray-700">Forms</h3>
-
-    <div class="mt-4">
-      <h4 class="text-gray-600">Model Form</h4>
-
-      <div class="mt-4">
-        <div
-          class="w-full max-w-sm overflow-hidden bg-white border rounded-md shadow-md">
-          <form>
-            <div
-              class="flex items-center justify-between px-5 py-3 text-gray-700 border-b">
-              <h3 class="text-sm">Add Category</h3>
-              <button>
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div class="px-5 py-6 text-gray-700 bg-gray-200 border-b">
-              <label class="text-xs">Name</label>
-
-              <div class="relative mt-2 rounded-md shadow-sm">
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-600">
-                  <svg
-                    class="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                  </svg>
-                </span>
-
-                <input
-                  type="text"
-                  class="w-full px-12 py-2 border-transparent rounded-md appearance-none focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500" />
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between px-5 py-3">
-              <button
-                class="px-3 py-1 text-sm text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none">
-                Cancel
-              </button>
-              <button
-                class="px-3 py-1 text-sm text-white bg-indigo-600 rounded-md hover:bg-indigo-500 focus:outline-none">
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-8">
-      <h4 class="text-gray-600">Forms</h4>
-
-      <div class="mt-4">
-        <div class="p-6 bg-white rounded-md shadow-md">
-          <h2 class="text-lg font-semibold text-gray-700 capitalize">
-            Account settings
-          </h2>
-
-          <form @submit.prevent="register">
-            <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-              <div>
-                <label class="text-gray-700" for="username">Username</label>
-                <input
-                  v-model="user.username"
-                  class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-                  type="text" />
-              </div>
-
-              <div>
-                <label class="text-gray-700" for="emailAddress"
-                  >Email Address</label
-                >
-                <input
-                  v-model="user.email"
-                  class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-                  type="email" />
-              </div>
-
-              <div>
-                <label class="text-gray-700" for="password">Password</label>
-                <input
-                  v-model="user.password"
-                  class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-                  type="password" />
-              </div>
-
-              <div>
-                <label class="text-gray-700" for="passwordConfirmation"
-                  >Password Confirmation</label
-                >
-                <input
-                  v-model="user.confirm"
-                  class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-                  type="password" />
-              </div>
-            </div>
-
-            <div class="flex justify-end mt-4">
-              <button
-                class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
-                Save
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+    <h3 class="text-3xl font-semibold text-gray-700 mb-3">
+      {{ form.id ? 'Atualize o perfil do aluno' : 'Cadastro de novo aluno' }}
+    </h3>
   </div>
+
+  <v-card variant="tonal" class="p-3">
+    <v-form @submit.prevent="onSubmit">
+      <div class="flex flex-wrap [&>*]:p-2">
+        <div class="w-full">
+          <v-text-field
+            class="bg-white dark:bg-gray-800"
+            variant="outlined"
+            v-model="form.name"
+            :counter="10"
+            label="Nome"
+            placeholder="Informe o nome completo"
+            hide-details
+            required />
+        </div>
+
+        <div class="w-full">
+          <v-text-field
+            class="bg-white dark:bg-gray-800"
+            variant="outlined"
+            v-model="form.email"
+            label="E-mail"
+            placeholder="Informe apenas um e-mail"
+            hide-details
+            required />
+        </div>
+
+        <div class="w-full">
+          <v-text-field
+            class="bg-white dark:bg-gray-800"
+            variant="outlined"
+            v-model="form.id"
+            :counter="10"
+            label="RA"
+            placeholder="RA será gerado altomaticamente"
+            hide-details
+            disabled
+            required />
+        </div>
+
+        <div class="w-full">
+          <v-text-field
+            class="bg-white dark:bg-gray-800"
+            variant="outlined"
+            :model-value="mask.masked(form.cpf)"
+            @update:model-value="value => (form.cpf = mask.unmasked(value))"
+            :counter="10"
+            label="CPF"
+            maxLength="14"
+            placeholder="Informe o numero do documento"
+            hide-details
+            :disabled="!!form.id"
+            required />
+        </div>
+
+        <div class="w-full gap-2 flex items-center justify-end">
+          <button type="button" @click="toList" class="btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </div>
+    </v-form>
+  </v-card>
 </template>

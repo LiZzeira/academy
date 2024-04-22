@@ -3,16 +3,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import DashboardView from '@/views/DashboardView.vue'
 import StudentsForms from '@/views/StudentsForms.vue'
-import StudentsTables from '@/views/StudentsTables.vue'
-import UIElements from '@/views/UIElements.vue'
 import PageLogin from '@/views/PageLogin.vue'
-import DataModal from '@/views/DataModal.vue'
-import DataCard from '@/views/DataCard.vue'
-import DataBlank from '@/views/DataBlank.vue'
+import store from '@/store'
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
+    path: '/login',
     name: 'Login',
     component: PageLogin,
     meta: { layout: 'empty' }
@@ -20,37 +16,38 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: DashboardView
+    component: DashboardView,
+    beforeEnter: async (_, __, next) => {
+      const res = await store.getters.getIsAuthenticated
+      if (!res) {
+        return next({ path: '/login' })
+      }
+      next()
+    }
   },
   {
     path: '/forms',
     name: 'Forms',
-    component: StudentsForms
+    component: StudentsForms,
+    beforeEnter: async (_, __, next) => {
+      const res = await store.getters.getIsAuthenticated
+      if (!res) {
+        return next({ path: '/login' })
+      }
+      next()
+    }
   },
   {
-    path: '/cards',
-    name: 'Cards',
-    component: DataCard
-  },
-  {
-    path: '/tables',
-    name: 'Tables',
-    component: StudentsTables
-  },
-  {
-    path: '/ui-elements',
-    name: 'UIElements',
-    component: UIElements
-  },
-  {
-    path: '/modal',
-    name: 'Modal',
-    component: DataModal
-  },
-  {
-    path: '/blank',
-    name: 'Blank',
-    component: DataBlank
+    path: '/forms/:id',
+    name: 'FormsId',
+    component: StudentsForms,
+    beforeEnter: async (_, __, next) => {
+      const res = await store.getters.getIsAuthenticated
+      if (!res) {
+        return next({ path: '/login' })
+      }
+      next()
+    }
   }
 ]
 

@@ -5,7 +5,11 @@ export class RequiredFieldValidation implements Validation {
   constructor(private readonly fieldName: string) {}
 
   validate(input: any): Error | null {
-    if (input[this.fieldName] === undefined || input[this.fieldName] === null) {
+    if (
+      input[this.fieldName] === undefined ||
+      input[this.fieldName] === null ||
+      input[this.fieldName]?.trim() === ''
+    ) {
       return new MissingParamError(this.fieldName)
     }
     return null

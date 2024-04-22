@@ -17,9 +17,116 @@ $scrollbar-hover-color: #718096;
     background: $scrollbar-color;
     border-radius: 4px;
 
-    
     &:hover {
       background: $scrollbar-hover-color;
     }
   }
+}
+
+.btn {
+  @apply flex-none font-semibold rounded-md px-4 py-2.5 bg-gray-200 transition-colors dark:bg-gray-700 dark:text-gray-50;
+
+  &:hover {
+    @apply bg-gray-300 dark:bg-gray-600;
+  }
+
+  &:disabled {
+    @apply bg-gray-300 pointer-events-none;
+  }
+
+  &.btn-primary {
+    @apply bg-primary-900 text-white;
+
+    &:hover {
+      @apply bg-primary-800;
+    }
+  }
+
+  &.btn-secondary {
+    @apply bg-transparent text-primary-900;
+
+    &:hover {
+      @apply bg-gray-200;
+    }
+  }
+
+  &.btn-success,
+  &.btn-danger,
+  &.btn-info {
+    @apply text-white;
+
+    &:hover {
+      @apply text-white; // Ensuring hover keeps text white
+    }
+  }
+
+  &.btn-success {
+    @apply bg-success-600;
+
+    &:hover {
+      @apply bg-success-700;
+    }
+  }
+
+  &.btn-danger {
+    @apply bg-danger-600;
+
+    &:hover {
+      @apply bg-danger-700;
+    }
+  }
+
+  &.btn-info {
+    @apply bg-info-600;
+
+    &:hover {
+      @apply bg-info-700;
+    }
+  }
+
+  &.outline-primary,
+  &.outline-success,
+  &.outline-info,
+  &.outline-danger {
+    @apply bg-transparent border-2 text-center;
+
+    &:hover {
+      @apply bg-gray-50 dark:bg-gray-700;
+    }
+  }
+
+  &.outline-primary {
+    @apply border-primary-900 text-primary-900;
+  }
+
+  &.outline-success {
+    @apply border-success-600 text-success-600;
+  }
+
+  &.outline-info {
+    @apply border-info-600 text-info-600;
+  }
+
+  &.outline-danger {
+    @apply border-danger-600 text-danger-600;
+  }
+}
+
+.swal2-actions {
+	@apply flex-row-reverse;
+}
+.swal2-confirm.swal2-styled,
+.swal2-deny.swal2-styled {
+	@apply rounded-full;
+}
+
+.swal2-confirm.swal2-styled {
+	@apply bg-success-600;
+}
+.swal2-deny.swal2-styled {
+	@apply bg-danger-600;
+}
+
+.v-input input {
+  @apply focus:ring-0
 }

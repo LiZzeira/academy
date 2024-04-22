@@ -1,8 +1,8 @@
-import Swal from 'sweetalert2'
+import Swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2'
 
 export default {
-  success: (message: string, title?: string): void => {
-    Swal.fire({
+  success: async (message: string, title?: string): Promise<void> => {
+    await Swal.fire({
       icon: 'success',
       title: title ?? 'Success',
       text: message,
@@ -10,8 +10,8 @@ export default {
     })
   },
 
-  danger: (message: string, title?: string): void => {
-    Swal.fire({
+  danger: async (message: string, title?: string): Promise<void> => {
+    await Swal.fire({
       icon: 'error',
       title: title ?? 'ERROR',
       text: message,
@@ -19,8 +19,8 @@ export default {
     })
   },
 
-  info: (message: string, title?: string): void => {
-    Swal.fire({
+  info: async (message: string, title?: string): Promise<void> => {
+    await Swal.fire({
       icon: 'info',
       title: title ?? 'Info',
       text: message,
@@ -28,12 +28,18 @@ export default {
     })
   },
 
-  warning: (message: string, title?: string): void => {
-    Swal.fire({
+  warning: async (message: string, title?: string): Promise<void> => {
+    await Swal.fire({
       icon: 'warning',
       title: title ?? 'Warning',
       text: message,
       confirmButtonText: 'OK'
     })
+  },
+
+  custom: async (
+    options: SweetAlertOptions
+  ): Promise<SweetAlertResult<any>> => {
+    return await Swal.fire(options)
   }
 }
