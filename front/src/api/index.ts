@@ -92,9 +92,14 @@ const apiService = {
 
   async saveStudent(student: StudentModel): Promise<StudentModel | null> {
     try {
-      const endpoint = student.id ? `student` : `student/${student.id}`
-      const method = student.id ? 'put' : 'post'
-      const response = await axios[method]<StudentModel>(endpoint, student)
+      if (student.id) {
+        const response = await axios.put<StudentModel>(
+          `student/${student.id}`,
+          student
+        )
+        return response.data
+      }
+      const response = await axios.post<StudentModel>('student', student)
       return response.data
     } catch (err: any) {
       handleApiError(err)
